@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Gestão Abramente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Abramente">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <style>
+    html, body { margin: 0; height: 100%; background: #ffffff; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #22355e; }
+    /* respeita o recorte da câmera e a barra de gestos do celular */
+    #moldura { position: fixed; top: env(safe-area-inset-top, 0); right: env(safe-area-inset-right, 0); bottom: env(safe-area-inset-bottom, 0); left: env(safe-area-inset-left, 0); }
+    iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+    #abertura, #semrede { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #fff; text-align: center; padding: 24px; transition: opacity .4s; }
+    #abertura img { width: 190px; height: auto; }
+    #abertura .nome { font-size: 20px; font-weight: 700; letter-spacing: .01em; }
+    #abertura .carregando { width: 46px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, #bcdccf, #9b7cc4, #bcdccf); background-size: 200% 100%; animation: anda 1.2s linear infinite; }
+    @keyframes anda { from { background-position: 0 0; } to { background-position: -200% 0; } }
+    #semrede { display: none; }
+    #semrede button { font: inherit; padding: 10px 22px; border-radius: 10px; border: 0; background: #22355e; color: #fff; }
+    .oculto { opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div id="moldura"></div>
+  <div id="abertura"><img src="logo-abramente.png" alt="Abramente"><div class="nome">Gestão Abramente</div><div class="carregando"></div></div>
+  <div id="semrede"><img src="icon-192.png" alt="" width="96" height="96"><div class="nome" style="font-weight:700;font-size:18px">Sem conexão com a internet</div><div style="color:#66748a;max-width:300px">O Gestão Abramente precisa de internet. Confira o Wi-Fi ou os dados móveis e tente de novo.</div><button onclick="location.reload()">Tentar de novo</button></div>
+  <script src="config.js"></script>
+  <script>
+    (function () {
+      var abertura = document.getElementById('abertura'), semrede = document.getElementById('semrede');
+      function abrir() {
+        if (!navigator.onLine) { abertura.classList.add('oculto'); semrede.style.display = 'flex'; return; }
+        var f = document.createElement('iframe');
+        f.src = window.APP_URL;
+        f.title = 'Gestão Abramente';
+        f.allow = 'clipboard-write; fullscreen';
+        f.onload = function () { setTimeout(function () { abertura.classList.add('oculto'); }, 300); };
+        document.getElementById('moldura').appendChild(f);
+        setTimeout(function () { abertura.classList.add('oculto'); }, 9000);   // não prende a tela de abertura se o carregamento demorar
+      }
+      window.addEventListener('offline', function () { semrede.style.display = 'flex'; });
+      window.addEventListener('online', function () { if (semrede.style.display === 'flex') location.reload(); });
+      abrir();
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    })();
+  </script>
+</body>
+</html>
